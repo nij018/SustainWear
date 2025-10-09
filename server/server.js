@@ -8,14 +8,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// serve build files for deployment
-const clientDist = path.join(__dirname, '../client/dist');
-app.use(express.static(clientDist));
-
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(clientDist, 'index.html'));
-});
-
 // routes will be added here
 //
 //
