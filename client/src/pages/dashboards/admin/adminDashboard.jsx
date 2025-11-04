@@ -1,9 +1,9 @@
-import DashboardLayout from "../../../components/Layout/DashboardLayout";
+import Layout from "../../../layout";
 
-export default function DonorDashboard() {
+export default function AdminDashboard() {
   return (
-    <DashboardLayout title="Admin Dashboard:">
-
-    </DashboardLayout>
+    <Layout title="Admin Dashboard:">
+      
+    </Layout>
   );
 }
