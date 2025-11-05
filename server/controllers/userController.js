@@ -8,10 +8,10 @@ const { v4: uuidv4 } = require("uuid");
 // SIGN UP FUNCTION
 const Register = async (req, res) => {
   try {
-    const { first_name, last_name, email, password, confirmPassword, role } = req.body;
+    const { first_name, last_name, email, password, confirmPassword } = req.body;
     console.log("Register request body:", req.body);
 
-    if (!first_name || !last_name || !email || !password || !confirmPassword || !role) { // check if all fields are filled
+    if (!first_name || !last_name || !email || !password || !confirmPassword) { // check if all fields are filled
       return res.status(400).json({ errMessage: "All fields are required" });
     }
 
@@ -30,20 +30,26 @@ const Register = async (req, res) => {
       // hash password using bcrypt
       const hashedPassword = await bcrypt.hash(password, 10);
       const signupDate = new Date().toISOString();
+      const defaultRole = "Donor";  // auto assign new users as donors
 
       const insertQuery = `
         INSERT INTO user (first_name, last_name, email, password, role, sign_up_date)
         VALUES (?, ?, ?, ?, ?, ?)
       `;
 
-      db.run(insertQuery, [first_name, last_name, email, hashedPassword, role, signupDate], function (err) {
-        if (err) {
-          console.error("Insert error:", err);
-          return res.status(500).json({ errMessage: "Database error", error: err.message });
+      db.run(insertQuery, [first_name, last_name, email, hashedPassword, defaultRole, signupDate],
+        function (err) {
+          if (err) {
+            console.error("Insert error:", err);
+            return res
+              .status(500)
+              .json({ errMessage: "Database error", error: err.message });
+          }
+          res
+            .status(201)
+            .json({ message: "Account created successfully as Donor", userId: this.lastID });
         }
-
-        res.status(201).json({ message: "Account created successfully", userId: this.lastID });
-      });
+      );
     });
   } catch (err) {
     console.error("Register exception:", err);

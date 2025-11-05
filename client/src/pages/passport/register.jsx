@@ -1,16 +1,17 @@
 import { useState } from "react";
 import {
   Box,
+  Text,
+  Link,
   Button,
   Input,
-  Select,
   VStack,
   Heading,
   Center,
 } from "@chakra-ui/react";
 import api from "../../api/axiosClient";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -47,6 +48,7 @@ export default function Register() {
         <VStack spacing={4}>
           <Input
             placeholder="First Name"
+            _placeholder={{ color: "gray.400" }}
             name="first_name"
             onChange={handleChange}
             bg="white"
@@ -54,6 +56,7 @@ export default function Register() {
           />
           <Input
             placeholder="Last Name"
+            _placeholder={{ color: "gray.400" }}
             name="last_name"
             onChange={handleChange}
             bg="white"
@@ -61,6 +64,7 @@ export default function Register() {
           />
           <Input
             placeholder="Email"
+            _placeholder={{ color: "gray.400" }}
             name="email"
             onChange={handleChange}
             bg="white"
@@ -68,6 +72,7 @@ export default function Register() {
           />
           <Input
             placeholder="Password"
+            _placeholder={{ color: "gray.400" }}
             name="password"
             type="password"
             onChange={handleChange}
@@ -76,26 +81,20 @@ export default function Register() {
           />
           <Input
             placeholder="Confirm Password"
+            _placeholder={{ color: "gray.400" }}
             name="confirmPassword"
             type="password"
             onChange={handleChange}
             bg="white"
             color="black"
           />
-          <Select
-            placeholder="Select Role"
-            name="role"
-            onChange={handleChange}
-            bg="white"
-            color="black"
-          >
-            <option value="Donor">Donor</option>
-            <option value="Staff">Charity Staff</option>
-            <option value="Admin">Admin</option>
-          </Select>
           <Button bg="white" color="brand.green" onClick={handleSubmit}>
             Register
           </Button>
+
+          <Box>
+            <Text opacity="80%">Already a user? <Link as={RouterLink} to="/login" textDecor="underline">Login</Link></Text>
+          </Box>
         </VStack>
       </Box>
     </Center>

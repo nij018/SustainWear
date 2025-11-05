@@ -6,7 +6,7 @@ const theme = extendTheme({
       green: "#2E7D32",
       beige: "#ffffffff",
       grey: "#4E4E4E",
-      darkGrey: "#212121",
+      darkGrey: "#242424ff",
       red: "#D32F2F",
       navbar: "#27672A",
     },

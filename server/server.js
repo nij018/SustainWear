@@ -21,7 +21,7 @@ app.use(cors(corsOptions));
 
 // routes
 app.use("/api", require("./routes/userRoutes"));
-// add routes here using same format
+app.use("/api", require("./routes/adminRoutes"));
 // add routes here using same format
 // add routes here using same format
 // add routes here using same format

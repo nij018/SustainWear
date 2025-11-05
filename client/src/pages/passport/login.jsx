@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {
   Box,
+  Text,
+  Link,
   Button,
   Input,
   VStack,
@@ -9,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import api from "../../api/axiosClient";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useAuth } from "../../auth/authContext";
 
 export default function Login() {
@@ -63,15 +65,16 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <VStack spacing={4}>
             <Input
-              placeholder="email@gmail.com"
+              placeholder="example@gmail.com"
+              _placeholder={{ color: "gray.400" }}
               name="email"
               onChange={handleChange}
               bg="white"
               color="black"
-              _placeholder={{ color: "gray.400" }}
             />
             <Input
               placeholder="Password"
+              _placeholder={{ color: "gray.400" }}
               name="password"
               type="password"
               onChange={handleChange}
@@ -81,6 +84,9 @@ export default function Login() {
             <Button type="submit" bg="white" color="brand.green">
               Login
             </Button>
+            <Box>
+              <Text opacity="80%">New user? <Link as={RouterLink} to="/register" textDecor="underline">Register</Link></Text>
+            </Box>
           </VStack>
         </form>
       </Box>
