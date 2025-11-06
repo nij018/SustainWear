@@ -34,7 +34,6 @@ export default function Register() {
       toast.success(res.data.message);
       setTimeout(() => navigate("/login"), 1000);
     } catch (err) {
-      console.error("Registration error:", err);
       toast.error(err.response?.data?.errMessage || "Something went wrong");
     }
   };

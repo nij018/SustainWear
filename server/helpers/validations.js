@@ -1,3 +1,4 @@
+// validate registeration user input
 function validateUserInput({ first_name, last_name, email, password, confirmPassword }) {
   if (!first_name || !last_name || !email || !password || !confirmPassword)
     return "All fields are required";
@@ -21,6 +22,7 @@ function validateUserInput({ first_name, last_name, email, password, confirmPass
   return null;
 };
 
+// validate two factor code input
 function validateTwoFactorInput({ tempToken, code, record }) {
   if (!tempToken || !code)
     return "Missing verification data";

@@ -2,14 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-require("dotenv").config();
-
+const { verifyToken } = require("./middlewares/authMiddleware");
 const app = express();
-
-// middlewares
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: false }));
 
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
@@ -19,9 +13,17 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+require("dotenv").config();
+
+// middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
+
 // routes
 app.use("/api", require("./routes/userRoutes"));
-app.use("/api", require("./routes/adminRoutes"));
+app.use("/api/admin", verifyToken, require("./routes/adminRoutes"));
+app.use("/api/donor", require("./routes/donorRoutes"));
 // add routes here using same format
 // add routes here using same format
 // add routes here using same format

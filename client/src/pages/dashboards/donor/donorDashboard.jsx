@@ -1,5 +1,8 @@
 import Layout from "../../../layout";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
+import DonateItem from "./donateItem";
+import DonationHistory from "./donationHistory";
+import Notifications from "./notifications";
 
 export default function AdminDashboard() {
   return (
@@ -12,7 +15,9 @@ export default function AdminDashboard() {
         </TabList>
 
         <TabPanels>
-
+          <TabPanel><DonateItem /></TabPanel>
+          <TabPanel><DonationHistory /></TabPanel>
+          <TabPanel><Notifications /></TabPanel>
         </TabPanels>
       </Tabs>
     </Layout>

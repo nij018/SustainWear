@@ -25,7 +25,7 @@ export default function ManageUsers() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => { // fetch users
-    api.get("/users")
+    api.get("/admin/users")
       .then((res) => {
         setUsers(res.data);
         setFilteredUsers(res.data);
@@ -49,7 +49,7 @@ export default function ManageUsers() {
   // update user data
   const handleUpdate = async (user_id, role, is_active) => {
     try {
-      await api.put("/users", { user_id, role, is_active });
+      await api.put("/admin/users", { user_id, role, is_active });
       toast.success("User updated successfully");
       setUsers((prev) =>
         prev.map((u) =>
