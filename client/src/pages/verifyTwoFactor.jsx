@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/authContext";
 
+// 6 digit input component with paste support
 function CodeInput({ code, setCode }) {
   const inputs = Array.from({ length: 6 }, () => useRef(null));
 
@@ -32,6 +33,21 @@ function CodeInput({ code, setCode }) {
     }
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("Text").trim();
+    if (!/^\d{1,6}$/.test(pasted)) return;
+
+    const digits = pasted.slice(0, 6).split("");
+    const newCode = Array(6).fill("");
+    digits.forEach((digit, i) => (newCode[i] = digit));
+
+    setCode(newCode.join(""));
+
+    const lastIndex = digits.length - 1;
+    if (inputs[lastIndex]) inputs[lastIndex].current.focus();
+  };
+
   return (
     <HStack justify="center" spacing={3}>
       {Array.from({ length: 6 }).map((_, i) => (
@@ -48,10 +64,12 @@ function CodeInput({ code, setCode }) {
           border="2px solid"
           borderColor="brand.green"
           borderRadius="md"
-          _focus={{ borderColor: "white", outline: "none" }}
+          _focus={{ borderColor: "brand.green", outline: "none" }}
           value={code[i] || ""}
           onChange={(e) => handleChange(e.target.value, i)}
           onKeyDown={(e) => handleKeyDown(e, i)}
+          onPaste={handlePaste}
+          onFocus={(e) => e.target.select()}
         />
       ))}
     </HStack>
@@ -64,7 +82,8 @@ export default function Verify2FA() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
-  useEffect(() => { // countdown timer for resend button
+  // countdown for resend button
+  useEffect(() => {
     if (resendCooldown === 0) return;
     const timer = setInterval(() => {
       setResendCooldown((prev) => Math.max(prev - 1, 0));
@@ -72,7 +91,8 @@ export default function Verify2FA() {
     return () => clearInterval(timer);
   }, [resendCooldown]);
 
-  const handleSubmit = async () => { // verify entered code
+  // verify entered code
+  const handleSubmit = async () => {
     const tempToken = localStorage.getItem("tempToken");
     if (!tempToken) return toast.error("Session expired. Please log in again.");
 
@@ -93,7 +113,7 @@ export default function Verify2FA() {
     }
   };
 
-  // resend verification code
+  // resend code
   const handleResend = async () => {
     const tempToken = localStorage.getItem("tempToken");
     if (!tempToken) return toast.error("Session expired. Please log in again.");

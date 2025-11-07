@@ -7,7 +7,8 @@ import DonorDashboard from "../pages/dashboards/donor/donorDashboard";
 import StaffDashboard from "../pages/dashboards/staff/staffDashboard";
 import AdminDashboard from "../pages/dashboards/admin/adminDashboard";
 import Landing from "../pages/landing";
-import Verify2FA from "../pages/verifyTwoFactor";
+import VerifyTwoFactor from "../pages/verifyTwoFactor";
+import ResetPassword from "../pages/resetPassword";
 
 export default function AppRouter() {
   return (
@@ -15,7 +16,8 @@ export default function AppRouter() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Landing />} />
-      <Route path="/verifyTwoFactors" element={<Verify2FA />} />
+      <Route path="/verifyTwoFactors" element={<VerifyTwoFactor />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       <Route
         path="/donor/*"

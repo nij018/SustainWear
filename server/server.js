@@ -1,19 +1,18 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const { verifyToken } = require("./middlewares/authMiddleware");
+const { verifyToken } = require("./middlewares/middlewares");
 const app = express();
 
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
     ? true
-    : 'http://localhost:5173',
+    : process.env.FRONTEND_URL,
   credentials: true,
 };
 app.use(cors(corsOptions));
-
-require("dotenv").config();
 
 // middlewares
 app.use(express.json());
@@ -38,7 +37,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // port
-const port = 5000;
+const port = process.env.PORT;
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

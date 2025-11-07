@@ -3,11 +3,11 @@ function validateUserInput({ first_name, last_name, email, password, confirmPass
   if (!first_name || !last_name || !email || !password || !confirmPassword)
     return "All fields are required";
 
-  if (first_name.length < 4 || first_name.length > 40)
-    return "First name should be between 4 and 40 characters";
+  if (first_name.length < 2 || first_name.length > 40)
+    return "First name should be between 2 and 40 characters";
 
-  if (last_name.length < 4 || last_name.length > 40)
-    return "Last name should be between 4 and 40 characters";
+  if (last_name.length < 2 || last_name.length > 40)
+    return "Last name should be between 2 and 40 characters";
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email))
@@ -19,7 +19,7 @@ function validateUserInput({ first_name, last_name, email, password, confirmPass
   if (password !== confirmPassword)
     return "Passwords do not match";
 
-  return null;
+  return null; // valid
 };
 
 // validate two factor code input
@@ -36,10 +36,80 @@ function validateTwoFactorInput({ tempToken, code, record }) {
   if (record.twoFactorCode !== code)
     return "Incorrect code";
 
-  return null;
+  return null; // valid
 }
 
-module.exports = { 
-  validateUserInput, 
-  validateTwoFactorInput 
+function validateNameInputs(first_name, last_name) {
+  if (!first_name || !last_name) {
+    return "First and last name are required";
+  }
+
+  if (first_name.length < 2 || first_name.length > 40) {
+    return "First name must be between 2 and 40 characters";
+  }
+
+  if (last_name.length < 2 || last_name.length > 40) {
+    return "Last name must be between 2 and 40 characters";
+  }
+
+  return null; // valid
+}
+
+function validatePasswordResetInput({ token, newPassword, confirmPassword }) {
+  if (!token)
+    return "Token not found, please request another email";
+
+  if (!newPassword || !confirmPassword)
+    return "All fields are required";
+
+  if (newPassword !== confirmPassword)
+    return "Passwords do not match";
+
+  if (newPassword.length < 8)
+    return "New password must be at least 8 characters long";
+
+  return null; // valid
+}
+
+// validate organisation creation
+function validateOrganisationInput({ name, description, street_name, post_code, city, contact_email }) {
+  if (!name || !description || !street_name || !post_code || !city || !contact_email) {
+    return "All fields are required";
+  }
+
+  if (name.length < 4 || name.length > 99) {
+    return "Organisation name must be between 4 and 99 characters";
+  }
+
+  if (description.length < 4 || description.length > 250) {
+    return "Organisation description must be between 4 and 250 characters";
+  }
+
+  if (street_name.length < 2 || street_name.length > 99) {
+    return "Street name must be between 2 and 99 characters";
+  }
+
+  const postCodeRegex = /^[A-Za-z0-9\s-]{3,10}$/;
+  if (!postCodeRegex.test(post_code)) {
+    return "Invalid post code format";
+  }
+
+  if (city.length < 2 || city.length > 99) {
+    return "City name must be between 2 and 99 characters";
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(contact_email)) {
+    return "Invalid contact email format";
+  }
+
+  return null; // valid
+}
+
+module.exports = {
+  validateUserInput,
+  validateTwoFactorInput,
+  validateNameInputs,
+  validatePasswordResetInput,
+  validateOrganisationInput,
 }

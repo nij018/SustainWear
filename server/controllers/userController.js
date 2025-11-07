@@ -3,11 +3,17 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("../config/jwt");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
-const { validateUserInput, validateTwoFactorInput } = require("../helpers/validations");
+const {
+  validateUserInput,
+  validateTwoFactorInput,
+  validateNameInputs,
+  validatePasswordResetInput,
+} = require("../helpers/validations");
 
 // REGISTER FUNCTION
-const Register = async (req, res) => {
+const register = async (req, res) => {
   try {
     const { first_name, last_name, email, password, confirmPassword } = req.body;
 
@@ -63,7 +69,7 @@ const transporter = nodemailer.createTransport({
 const twoFactor = {}; // temp code stored here
 
 // LOGIN FUNCTION
-const Login = (req, res) => {
+const login = (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -74,11 +80,16 @@ const Login = (req, res) => {
     db.get(loginQuery, [email], async (error, user) => {
       if (error) return res.status(500).json({ errMessage: "Database error", error: error.message });
       if (!user) return res.status(400).json({ errMessage: "Account does not exist" });
+      if (user.is_active === 0) { // check if user account has been deactivated
+        return res.status(403).json({
+          errMessage:
+            "This account has been deactivated. Please contact support or an administrator.",
+        });
+      }
 
       // compare hashed passwords
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) return res.status(400).json({ errMessage: "Invalid email or password" });
-
 
       // generate two factor code (6 digits)
       const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -112,8 +123,8 @@ const VerifyTwoFactors = (req, res) => {
     const record = twoFactor[tempToken];
 
     // validate twofactor code
-    const error = validateTwoFactorInput({ tempToken, code, record });
-    if (error) return res.status(400).json({ errMessage: error });
+    const validationError = validateTwoFactorInput({ tempToken, code, record });
+    if (validationError) return res.status(400).json({ errMessage: validationError });
 
     const getUserQuery = "SELECT * FROM USER WHERE user_id = ?";
 
@@ -203,55 +214,126 @@ const ResendTwoFactors = (req, res) => {
 
 // GET PROFILE FUNCTION
 const getProfile = (req, res) => {
-  try {
-    const authHeader = req.headers.authorization;
+  const userId = req.user?.id;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ errMessage: "No token provided" });
-    }
+  if (!userId) return res.status(401).json({ errMessage: "Unauthorized" });
 
-    const token = authHeader.split(" ")[1];
+  const getProfileQuery = "SELECT * FROM USER WHERE user_id = ?";
 
-    jwt.verify(token, jwtSecret, {}, (err, decoded) => {
-      if (err) return res.status(401).json({ errMessage: "Invalid token" });
+  db.get(getProfileQuery, [userId], (err, user) => {
+    if (err) return res.status(500).json({ errMessage: "Database error" });
+    if (!user) return res.status(404).json({ errMessage: "User not found" });
 
-      const getProfileQuery = "SELECT * FROM USER WHERE user_id = ?";
-      db.get(getProfileQuery, [decoded.id], (err, user) => {
-        if (err) {
-          return res.status(500).json({ errMessage: "Database error" });
-        }
-
-        if (!user) {
-          return res.status(404).json({ errMessage: "User not found" });
-        }
-
-        res.status(200).json({
-          user: {
-            id: user.user_id,
-            first_name: user.first_name,
-            last_name: user.last_name,
-            email: user.email,
-            role: user.role,
-          },
-        });
-      });
+    res.status(200).json({
+      user: {
+        id: user.user_id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.role,
+      },
     });
-  } catch (error) {
-    return res.status(500).json({ errMessage: "Internal server error" });
+  });
+};
+
+// UPDATE FIRST AND LAST NAME
+const updateName = (req, res) => {
+  const { first_name, last_name } = req.body;
+  const userId = req.user?.id;
+
+  const validationError = validateNameInputs(req.body);
+  if (validationError) return res.status(400).json({ errMessage: validationError });
+
+  const query = `UPDATE USER SET first_name = ?, last_name = ? WHERE user_id = ?`;
+  db.run(query, [first_name, last_name, userId], function (err) {
+    if (err) return res.status(500).json({ errMessage: "Database error", error: err.message });
+
+    res.status(200).json({ message: "Name updated successfully" });
+  });
+};
+
+// REQUEST CHANGE PASSWORD TOKEN
+const requestPasswordChange = async (req, res) => {
+  const userId = req.user?.id;
+  const email = req.user?.email;
+
+  if (!userId || !email) return res.status(401).json({ errMessage: "Unauthorized request" });
+
+  try { // generate short lived JWT token
+    const token = jwt.sign({ id: userId }, jwtSecret, { expiresIn: "15m" });
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    await transporter.sendMail({
+      from: `"SustainWear" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: "Change Your Password",
+      text: `Click the link below to change your password (expires in 15 minutes):\n\n${resetLink}`,
+    });
+
+    res.status(200).json({ message: "Password change link sent to your email" });
+  } catch (err) {
+    res.status(500).json({ errMessage: "Failed to send email" });
   }
 };
 
+// RESET PASSWORD
+const resetPassword = async (req, res) => {
+  const { token, newPassword, confirmPassword } = req.body;
+
+  const validationError = validatePasswordResetInput(req.body);
+  if (validationError) return res.status(400).json({ errMessage: validationError });
+
+  try {
+    const decoded = jwt.verify(token, jwtSecret); // verify token and extract user id
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    db.run(`UPDATE USER SET password = ? WHERE user_id = ?`, [hashedPassword, decoded.id],
+      function (err) {
+        if (err) return res.status(500).json({ errMessage: "Failed to update password" });
+
+        res.status(200).json({ message: "Password changed successfully" });
+      }
+    );
+  } catch (err) {
+    res.status(400).json({ errMessage: "Invalid or expired token" });
+  }
+};
+
+// DELETE ACCOUNT
+const deleteAccount = (req, res) => {
+  const userId = req.user?.id;
+  const { password } = req.body;
+
+  db.get(`SELECT password FROM USER WHERE user_id = ?`, [userId], async (err, user) => {
+    if (err) res.status(500).json({ errMessage: "Database error", error: err.message });
+    if (!user) return res.status(404).json({ errMessage: "User not found" });
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ errMessage: "Incorrect password" });
+
+    db.run(`DELETE FROM USER WHERE user_id = ?`, [userId], (err2) => {
+      if (err2) res.status(500).json({ errMessage: "Failed to delete account", error: err2.message });
+
+      res.status(200).json({ message: "Account deleted successfully" });
+    });
+  });
+};
+
 // LOGOUT
-const Logout = (req, res) => {
+const logout = (req, res) => {
   res.clearCookie("token");
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
 module.exports = {
-  Register,
-  Login,
+  register,
+  login,
   VerifyTwoFactors,
   ResendTwoFactors,
   getProfile,
-  Logout,
+  updateName,
+  requestPasswordChange,
+  resetPassword,
+  deleteAccount,
+  logout,
 };
