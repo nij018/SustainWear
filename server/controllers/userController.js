@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { jwtSecret } = require("../config/jwt");
 const nodemailer = require("nodemailer");
-const crypto = require("crypto");
 const { v4: uuidv4 } = require("uuid");
 const {
   validateUserInput,
