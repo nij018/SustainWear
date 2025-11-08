@@ -4,6 +4,7 @@ import {
   Table,
   Thead,
   Tbody,
+  Flex,
   Tr,
   Th,
   Td,
@@ -199,22 +200,25 @@ export default function ManageOrganisations() {
                 </Td>
                 <Td>{new Date(org.created_at).toLocaleDateString()}</Td>
                 <Td>
-                  <HStack>
+                  <Flex justify="center" align="center" gap={3}>
                     <Button
                       size="sm"
                       colorScheme={org.is_active ? "yellow" : "green"}
+                      w="100px"
                       onClick={() => confirmToggle(org)}
                     >
                       {org.is_active ? "Deactivate" : "Activate"}
                     </Button>
+
                     <Button
                       size="sm"
                       colorScheme="red"
+                      w="100px"
                       onClick={() => confirmDelete(org)}
                     >
                       Delete
                     </Button>
-                  </HStack>
+                  </Flex>
                 </Td>
               </Tr>
             ))

@@ -7,7 +7,7 @@ const db = require("../config/db");
  * @param {number|null} target_user_id - Optional target user ID
  * @param {number|null} target_org_id - Optional target organisation ID
  */
-function logAuditAction(admin_id, action, target_user_id = null, target_org_id = null) {
+const logAuditAction = (admin_id, action, target_user_id = null, target_org_id = null) => {
   const query = `
     INSERT INTO AUDIT_LOG (admin_id, action, target_user_id, target_org_id, timestamp)
     VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)

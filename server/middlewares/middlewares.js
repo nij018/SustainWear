@@ -3,7 +3,7 @@ const { jwtSecret } = require("../config/jwt");
 const db = require("../config/db");
 
 // VERIFY USER TOKEN
-function verifyToken(req, res, next) {
+const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -34,8 +34,16 @@ function verifyToken(req, res, next) {
   }
 }
 
+// VERIFY ADMIN ROLE (ONLY ADMIN CAN DO ADMIN ACTIONS)
+const verifyAdmin = (req, res, next) => {
+  if (req.user?.role !== "Admin") {
+    return res.status(403).json({ errMessage: "Access denied. Admins only." });
+  }
+  next();
+}
+
 // VEIRFY TEMP RESET PASSWORD TOKEN
-function verifyResetToken(req, res) {
+const verifyResetToken = (req, res) => {
   try {
     const { token } = req.params;
     const decoded = jwt.verify(token, jwtSecret);
@@ -47,5 +55,6 @@ function verifyResetToken(req, res) {
 
 module.exports = { 
   verifyToken,
+  verifyAdmin,
   verifyResetToken,
 };

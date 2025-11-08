@@ -4,6 +4,7 @@ import {
   Table,
   Thead,
   Tbody,
+  Flex,
   Tr,
   Th,
   Td,
@@ -69,8 +70,9 @@ export default function ManageUsers() {
           u.user_id === user_id ? { ...u, role, is_active } : u
         )
       );
-    } catch {
-      toast.error("Failed to update user");
+    } catch (err) {
+      const msg = err.response?.data?.errMessage;
+      toast.error(msg);
     }
   };
 
@@ -136,46 +138,69 @@ export default function ManageUsers() {
                 <Td>{user.first_name} {user.last_name}</Td>
                 <Td>{user.email}</Td>
                 <Td>
-                  <Badge
-                    colorScheme={user.role === "Admin" ? "blue" : "gray"}
-                    px={2}
-                    py={1}
-                    borderRadius="md"
-                  >
-                    {user.role}
-                  </Badge>
+                  <Flex justify="center" align="center" width="100%">
+                    <Badge
+                      colorScheme={user.role === "Admin" ? "blue" : "gray"}
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                    >
+                      {user.role}
+                    </Badge>
+                  </Flex>
                 </Td>
                 <Td>
-                  <Badge colorScheme={user.is_active ? "green" : "red"}>
-                    {user.is_active ? "Active" : "Inactive"}
-                  </Badge>
+                  <Flex justify="center" align="center" width="100%">
+                    <Badge
+                      colorScheme={user.is_active ? "green" : "red"}
+                      px={3}
+                      py={1}
+                      borderRadius="md"
+                      textAlign="center"
+                      minW="80px"
+                    >
+                      {user.is_active ? "Active" : "Inactive"}
+                    </Badge>
+                  </Flex>
                 </Td>
-                <Td>
-                  <HStack spacing={2}>
-                    {user.role !== "Admin" ? (
+                <Td width="250px">
+                  {user.role !== "Admin" ? (
+                    <HStack spacing={2}>
                       <Button
                         size="sm"
+                        width="60%"
                         colorScheme="blue"
                         onClick={() => openModal(user, "promote")}
                       >
                         Promote to Admin
                       </Button>
-                    ) : (
-                      <Badge colorScheme="gray">Already Admin</Badge>
-                    )}
 
-                    <Button
-                      size="sm"
-                      colorScheme={user.is_active ? "red" : "green"}
-                      onClick={() =>
-                        user.is_active
-                          ? openModal(user, "deactivate")
-                          : handleUpdate(user.user_id, user.role, true)
-                      }
-                    >
-                      {user.is_active ? "Deactivate" : "Activate"}
-                    </Button>
-                  </HStack>
+                      <Button
+                        size="sm"
+                        width="40%"
+                        colorScheme={user.is_active ? "yellow" : "green"}
+                        onClick={() =>
+                          user.is_active
+                            ? openModal(user, "deactivate")
+                            : handleUpdate(user.user_id, user.role, true)
+                        }
+                      >
+                        {user.is_active ? "Deactivate" : "Activate"}
+                      </Button>
+                    </HStack>
+                  ) : (
+                    <Flex justify="center" width="240px">
+                      <Badge
+                        colorScheme="gray"
+                        w="100%"
+                        textAlign="center"
+                        py={1}
+                        borderRadius="md"
+                      >
+                        Already Admin
+                      </Badge>
+                    </Flex>
+                  )}
                 </Td>
               </Tr>
             ))

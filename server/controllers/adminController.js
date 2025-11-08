@@ -16,12 +16,18 @@ const updateUser = (req, res) => {
     });
   }
 
+  const normalizedStatus = Number(is_active);
+
   // check current role
   const checkUserQuery = `SELECT role, is_active FROM USER WHERE user_id = ?`;
 
   db.get(checkUserQuery, [user_id], (err, user) => {
     if (err) return res.status(500).json({ errMessage: "Database error", error: err.message });
     if (!user) return res.status(404).json({ errMessage: "User not found" });
+
+    if (user.role === "Admin" && normalizedStatus === 0) {
+      return res.status(403).json({ errMessage: "You cannot deactivate another admin." });
+    }
 
     if (user.role === "Admin" && role === "Donor") {
       return res.status(403).json({ errMessage: "You cannot demote another admin." });
@@ -30,7 +36,7 @@ const updateUser = (req, res) => {
     // continue with updating
     const updateQuery = `UPDATE USER SET role = ?, is_active = ? WHERE user_id = ?`;
 
-    db.run(updateQuery, [role, is_active, user_id], function (updateErr) {
+    db.run(updateQuery, [role, is_active, user_id], (updateErr) => {
       if (updateErr)
         return res.status(500).json({
           errMessage: "Database error",
@@ -82,7 +88,7 @@ const addOrganisation = (req, res) => {
   `;
 
   db.run(query, [name, description, street_name, post_code, city, contact_email],
-    function (err) {
+    (err) => {
       if (err) {
         if (err.message.includes("UNIQUE constraint failed: ORGANISATION.name")) {
           return res.status(400).json({
@@ -128,7 +134,7 @@ const updateOrganisationStatus = (req, res) => {
 
   const query = `UPDATE ORGANISATION SET is_active = ? WHERE org_id = ?`;
 
-  db.run(query, [is_active ? 1 : 0, org_id], function (err) {
+  db.run(query, [is_active ? 1 : 0, org_id], (err) => {
     if (err)
       return res.status(500).json({ errMessage: "Failed to update organisation", error: err.message });
 
@@ -145,7 +151,7 @@ const deleteOrganisation = (req, res) => {
   const query = `DELETE FROM ORGANISATION WHERE org_id = ?`;
   const admin_id = req.user?.id;
 
-  db.run(query, [id], function (err) {
+  db.run(query, [id], (err) => {
     if (err)
       return res.status(500).json({ errMessage: "Failed to delete organisation", error: err.message });
 

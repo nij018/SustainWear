@@ -1,5 +1,5 @@
 // validate registeration user input
-function validateUserInput({ first_name, last_name, email, password, confirmPassword }) {
+const validateUserInput = ({ first_name, last_name, email, password, confirmPassword }) => {
   if (!first_name || !last_name || !email || !password || !confirmPassword)
     return "All fields are required";
 
@@ -23,7 +23,7 @@ function validateUserInput({ first_name, last_name, email, password, confirmPass
 };
 
 // validate two factor code input
-function validateTwoFactorInput({ tempToken, code, record }) {
+const validateTwoFactorInput = ({ tempToken, code, record }) => {
   if (!tempToken || !code)
     return "Missing verification data";
 
@@ -39,7 +39,7 @@ function validateTwoFactorInput({ tempToken, code, record }) {
   return null; // valid
 }
 
-function validateNameInputs(first_name, last_name) {
+const validateNameInputs = (first_name, last_name) => {
   if (!first_name || !last_name) {
     return "First and last name are required";
   }
@@ -55,7 +55,7 @@ function validateNameInputs(first_name, last_name) {
   return null; // valid
 }
 
-function validatePasswordResetInput({ token, newPassword, confirmPassword }) {
+const validatePasswordResetInput = ({ token, newPassword, confirmPassword }) => {
   if (!token)
     return "Token not found, please request another email";
 
@@ -72,7 +72,7 @@ function validatePasswordResetInput({ token, newPassword, confirmPassword }) {
 }
 
 // validate organisation creation
-function validateOrganisationInput({ name, description, street_name, post_code, city, contact_email }) {
+const validateOrganisationInput = ({ name, description, street_name, post_code, city, contact_email }) => {
   if (!name || !description || !street_name || !post_code || !city || !contact_email) {
     return "All fields are required";
   }

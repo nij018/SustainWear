@@ -3,7 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const { verifyToken } = require("./middlewares/middlewares");
+const { verifyToken, verifyAdmin } = require("./middlewares/middlewares");
 const app = express();
 
 const corsOptions = {
@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // routes
 app.use("/api", require("./routes/userRoutes"));
-app.use("/api/admin", verifyToken, require("./routes/adminRoutes"));
+app.use("/api/admin", verifyToken, verifyAdmin, require("./routes/adminRoutes"));
 app.use("/api/donor", require("./routes/donorRoutes"));
 // add routes here using same format
 // add routes here using same format

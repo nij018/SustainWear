@@ -37,7 +37,7 @@ const register = async (req, res) => {
       `;
 
       db.run(insertQuery, [first_name, last_name, email, hashedPassword, defaultRole, registerDate],
-        function (insertErr) {
+        (insertErr) => {
           if (insertErr) {
             return res.status(500).json({
               errMessage: "Database error while creating user",
@@ -245,7 +245,7 @@ const updateName = (req, res) => {
   if (validationError) return res.status(400).json({ errMessage: validationError });
 
   const query = `UPDATE USER SET first_name = ?, last_name = ? WHERE user_id = ?`;
-  db.run(query, [first_name, last_name, userId], function (err) {
+  db.run(query, [first_name, last_name, userId], (err) => {
     if (err) return res.status(500).json({ errMessage: "Database error", error: err.message });
 
     res.status(200).json({ message: "Name updated successfully" });
@@ -288,7 +288,7 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     db.run(`UPDATE USER SET password = ? WHERE user_id = ?`, [hashedPassword, decoded.id],
-      function (err) {
+       (err) => {
         if (err) return res.status(500).json({ errMessage: "Failed to update password" });
 
         res.status(200).json({ message: "Password changed successfully" });
