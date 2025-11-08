@@ -19,7 +19,7 @@ export default function ProtectedRoute({ allowedRoles, children }) {
   const allowed = allowedRoles.map((r) => r.toLowerCase());
 
   if (!allowed.includes(userRole)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" replace />; // '/' refers to landing page (default)
   }
 
   return children;

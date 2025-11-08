@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { ChakraProvider } from "@chakra-ui/react";
 import { Toaster } from "react-hot-toast";
-import theme from "./theme/theme.js";
+import theme from "./theme.js";
 import { AuthProvider } from "./auth/authContext.jsx";
 import App from "./App.jsx";
 
