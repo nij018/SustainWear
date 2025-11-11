@@ -47,7 +47,7 @@ export default function Header() {
         <Avatar name={user.name} bg="teal.300" color="black" />
         <Box>
           <Text fontWeight="bold" fontSize="lg">
-            {user.first_name || user.name}
+           {user.first_name} {user.last_name || user.name}
           </Text>
           <Text fontSize="sm" opacity="60%">
             {user.email}
